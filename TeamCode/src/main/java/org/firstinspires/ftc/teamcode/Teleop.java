@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
@@ -66,7 +67,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @TeleOp(name="Basic Teleop", group="Linear OpMode")
 public class Teleop extends LinearOpMode {
 
-    // Declare OpMode members for each of the 4 motors.
+    // Declare OpMode members for each of the 5 motors.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor leftFrontDrive = null;
     private DcMotor leftBackDrive = null;
@@ -74,7 +75,12 @@ public class Teleop extends LinearOpMode {
     private DcMotor rightBackDrive = null;
     private DcMotor intake = null;
     private DcMotor arm = null;
-
+    private DcMotor witchfingers = null;
+    final double ARM_TICKS_PER_DEGREE =
+            28 // number of encoder ticks per rotation of the bare motor
+                    * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
+                    * 100.0 / 20.0 // This is the external gear reduction, a 20T pinion gear that drives a 100T hub-mount gear
+                    * 1 / 360.0; // we want ticks per degree, not per rotation
     @Override
     public void runOpMode() {
 
@@ -87,7 +93,7 @@ public class Teleop extends LinearOpMode {
         leftBackDrive  = hardwareMap.get(DcMotor.class, "backLeft");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "frontRight");
         rightBackDrive = hardwareMap.get(DcMotor.class, "backRight");
-
+        witchfingers = hardwareMap.get(DcMotor.class, "witchfingers");
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -102,8 +108,7 @@ public class Teleop extends LinearOpMode {
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
-
-        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        witchfingers.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -117,7 +122,7 @@ public class Teleop extends LinearOpMode {
             double max;
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            double axial   = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
+            double axial   = gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value //NOTE: I Removed negative value that was originally here
             double lateral =  gamepad1.left_stick_x;
             double yaw     =  gamepad1.right_stick_x;
 
@@ -163,6 +168,8 @@ public class Teleop extends LinearOpMode {
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
 
+            witchfingers.setPower(gamepad2.right_stick_y);
+            arm.setPower(gamepad2.left_stick_y);
 
 
             if (gamepad2.x) {
@@ -173,18 +180,13 @@ public class Teleop extends LinearOpMode {
                 intake.setPower(-1);
             }
 
-            if (gamepad2.left_bumper) {
-                arm.setTargetPosition(-55);
-            } else if (gamepad2.right_bumper) {
-                arm.setTargetPosition(-15);
-            }
-
-            telemetry.addData("armTarget", arm.getTargetPosition());
-
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
+            telemetry.addData("witchfingers: ", witchfingers.getTargetPosition());
+            telemetry.addData("arm: ", arm.getTargetPosition());
+            telemetry.addData("leftFront: ", leftFrontDrive.getTargetPosition());
             telemetry.update();
         }
     }}
