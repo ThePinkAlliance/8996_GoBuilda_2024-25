@@ -32,8 +32,10 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
@@ -73,8 +75,9 @@ public class Teleop extends LinearOpMode {
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
-    private DcMotor intake = null;
     private DcMotor arm = null;
+    private CRServo leftCarwash = null;
+    private CRServo rightCarwash = null;
     private DcMotor witchfingers = null;
     final double ARM_TICKS_PER_DEGREE =
             28 // number of encoder ticks per rotation of the bare motor
@@ -87,8 +90,9 @@ public class Teleop extends LinearOpMode {
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
-        intake = hardwareMap.get(DcMotor.class, "intake" );
         arm = hardwareMap.get(DcMotor.class, "arm");
+        leftCarwash = hardwareMap.get(CRServo.class, "left_servo");
+        rightCarwash = hardwareMap.get(CRServo.class, "right_servo");
         leftFrontDrive  = hardwareMap.get(DcMotor.class, "frontLeft");
         leftBackDrive  = hardwareMap.get(DcMotor.class, "backLeft");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "frontRight");
@@ -109,7 +113,6 @@ public class Teleop extends LinearOpMode {
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         witchfingers.setDirection(DcMotor.Direction.FORWARD);
-
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -162,22 +165,38 @@ public class Teleop extends LinearOpMode {
             rightBackPower  = gamepad1.b ? 1.0 : 0.0;  // B gamepad
             */
 
-            // Send calculated power to wheels
-            leftFrontDrive.setPower(leftFrontPower);
-            rightFrontDrive.setPower(rightFrontPower);
-            leftBackDrive.setPower(leftBackPower);
-            rightBackDrive.setPower(rightBackPower);
+            if (gamepad1.right_bumper == false) {
+                // Send calculated power to wheels
+                leftFrontDrive.setPower(leftFrontPower);
+                rightFrontDrive.setPower(rightFrontPower);
+                leftBackDrive.setPower(leftBackPower);
+                rightBackDrive.setPower(rightBackPower);
 
-            witchfingers.setPower(gamepad2.right_stick_y);
-            arm.setPower(gamepad2.left_stick_y);
+            } else {
+                // Send calculated power to wheels
+                leftFrontDrive.setPower(leftFrontPower /2);
+                rightFrontDrive.setPower(rightFrontPower /2);
+                leftBackDrive.setPower(leftBackPower /2);
+                rightBackDrive.setPower(rightBackPower /2);
 
+            }
+            if (gamepad2.right_bumper == false) {
+                witchfingers.setPower(gamepad2.right_stick_y);
+                arm.setPower(gamepad2.left_stick_y);
+            } else {
+                witchfingers.setPower(gamepad2.right_stick_y /2);
+                arm.setPower(gamepad2.left_stick_y /2);
+            }
 
-            if (gamepad2.x) {
-                intake.setPower(1);
+            if (gamepad2.x) { //grabs the sample
+               leftCarwash.setPower(-1);
+               rightCarwash.setPower(1);
             } else if (gamepad2.a) {
-                intake.setPower(0);
-            } else if (gamepad2.b) {
-                intake.setPower(-1);
+                leftCarwash.setPower(0);
+                rightCarwash.setPower(0);
+            } else if (gamepad2.b) {//ejects the sample
+                leftCarwash.setPower(1);
+                rightCarwash.setPower(-1);
             }
 
             // Show the elapsed game time and wheel power.
