@@ -206,6 +206,7 @@ public class Teleop extends LinearOpMode {
             telemetry.addData("witchfingers: ", witchfingers.getTargetPosition());
             telemetry.addData("arm: ", arm.getTargetPosition());
             telemetry.addData("leftFront: ", leftFrontDrive.getTargetPosition());
+            telemetry.addData("arm: ", arm.getCurrentPosition());
             telemetry.update();
         }
     }}
