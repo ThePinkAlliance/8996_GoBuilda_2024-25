@@ -66,12 +66,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class main_auto extends LinearOpMode {
 
     /* Declare OpMode members. */
-    private DcMotor         frontRight   = null;
-    private DcMotor         frontLeft   = null;
-    private DcMotor         backRight = null;
-    private DcMotor         backLeft = null;
-    private DcMotor         armMotor    = null; //the arm motor
-    private ElapsedTime     runtime = new ElapsedTime();
+    private DcMotor frontRight = null;
+    private DcMotor frontLeft = null;
+    private DcMotor backRight = null;
+    private DcMotor backLeft = null;
+    private DcMotor armMotor = null; //the arm motor
+    private ElapsedTime runtime = new ElapsedTime();
 
     // Calculate the COUNTS_PER_INCH for your specific drive train.
     // Go to your motor vendor website to determine your motor's COUNTS_PER_MOTOR_REV
@@ -79,28 +79,27 @@ public class main_auto extends LinearOpMode {
     // For example, use a value of 2.0 for a 12-tooth spur gear driving a 24-tooth spur gear.
     // This is gearing DOWN for less speed and more torque.
     // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
-    static final double     COUNTS_PER_MOTOR_REV    = 537.7 ;    // eg: TETRIX Motor Encoder
-    static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
-    static final double     WHEEL_DIAMETER_INCHES   = 3.8 ;     // For figuring circumference
-    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+    static final double COUNTS_PER_MOTOR_REV = 537.7;    // eg: TETRIX Motor Encoder
+    static final double DRIVE_GEAR_REDUCTION = 1.0;     // No External Gearing.
+    static final double WHEEL_DIAMETER_INCHES = 3.8;     // For figuring circumference
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double     DRIVE_SPEED             = 0.6;
-    static final double     TURN_SPEED              = 0.5;
+    static final double DRIVE_SPEED = 0.6;
+    static final double TURN_SPEED = 0.5;
 
     @Override
     public void runOpMode() {
 
         // Initialize the drive system variables.
-        frontLeft  = hardwareMap.get(DcMotor.class, "frontLeft");
+        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
         frontRight = hardwareMap.get(DcMotor.class, "frontRight");
         backLeft = hardwareMap.get(DcMotor.class, "backLeft");
         backRight = hardwareMap.get(DcMotor.class, "backRight");
 
-        armMotor   = hardwareMap.get(DcMotor.class, "arm"); //the arm motor
+        armMotor = hardwareMap.get(DcMotor.class, "arm"); //the arm motor
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-
 
 
         backLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -117,18 +116,15 @@ public class main_auto extends LinearOpMode {
         backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // Send telemetry message to indicate successful Encoder reset
-        telemetry.addData("Starting at",  "%7d :%7d",
+        telemetry.addData("Starting at", "%7d :%7d",
                 frontLeft.getCurrentPosition(),
                 frontRight.getCurrentPosition());
         telemetry.update();
 
         // Wait for the game to start (driver presses START)
         waitForStart();
-        encoderMove(frontLeft, 0.5,10, 1);
-        encoderMove(frontRight, 0.5,10, 1);
-        encoderMove(backLeft, 0.5,10, 1);
-        encoderMove(backRight, 0.5,10, 1);
-
+        driveMotors(0.5, 10, 1);
+        driveLeft(0.5, 10, 1);
         telemetry.addData("Path", "Complete");
         telemetry.update();
         sleep(1000);  // pause to display final telemetry message.
@@ -162,6 +158,77 @@ public class main_auto extends LinearOpMode {
             motor.setPower(0);
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             sleep(250); // optional pause
+        }
+    }
+
+    public void driveLeft(double speed, double inches, double timeoutS) {
+        int target;
+
+
+        int frontLL = 0;
+        int backLL = 0;
+        int backRL = 0;
+        int frontRL = 0;
+
+
+        frontLL = frontLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+        frontLeft.setDirection(DcMotor.Direction.FORWARD);
+        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        runtime.reset();
+        frontLeft.setPower(Math.abs(speed));
+
+        frontRL = frontRight.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH);
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        runtime.reset();
+        frontLeft.setPower(Math.abs(speed));
+
+        backLL = backLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
+        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        runtime.reset();
+        backLeft.setPower(Math.abs(speed));
+
+        backRL = backRight.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH);
+        backRight.setDirection(DcMotor.Direction.FORWARD);
+        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        runtime.reset();
+        backRight.setPower(Math.abs(speed));
+    }
+
+    public void driveMotors(double speed, double inches, double timeoutS) {
+        int target;
+
+        int frontR = 0;
+        int frontL = 0;
+        int backL = 0;
+        int backR = 0;
+
+        if (opModeIsActive()) {
+
+            backR = backRight.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+                    backRight.setTargetPosition(backR);
+                    backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    runtime.reset();
+                    backRight.setPower(Math.abs(speed));
+
+            backL = backLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+                    backLeft.setTargetPosition(backL);
+                    backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    runtime.reset();
+                    backLeft.setPower(Math.abs(speed));
+
+            frontR = frontRight.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+            frontRight.setTargetPosition(frontR);
+            frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            runtime.reset();
+            frontRight.setPower(Math.abs(speed));
+
+            frontL = frontLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+            frontLeft.setTargetPosition(frontL);
+            frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            runtime.reset();
+            frontLeft.setPower(Math.abs(speed));
         }
     }
 }
