@@ -69,7 +69,8 @@ public class main_auto extends LinearOpMode {
     private DcMotor frontLeft = null;
     private DcMotor backRight = null;
     private DcMotor backLeft = null;
-    private DcMotor armMotor = null; //the arm motor
+    private DcMotor armL = null; // left arm
+    private DcMotor armR = null; // right arm
     private DcMotor witchfingersMotor = null;
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -101,7 +102,9 @@ public class main_auto extends LinearOpMode {
         backLeft = hardwareMap.get(DcMotor.class, "backLeft");
         backRight = hardwareMap.get(DcMotor.class, "backRight");
         witchfingersMotor = hardwareMap.get(DcMotor.class, "witchfingers");
-        armMotor = hardwareMap.get(DcMotor.class, "arm"); //the arm motor
+        armL = hardwareMap.get(DcMotor.class, "armL");
+        armR = hardwareMap.get(DcMotor.class, "armR");
+         //the arm motor
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
