@@ -32,7 +32,6 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
@@ -71,19 +70,25 @@ public class main_auto extends LinearOpMode {
     private DcMotor backRight = null;
     private DcMotor backLeft = null;
     private DcMotor armMotor = null; //the arm motor
+    private DcMotor witchfingersMotor = null;
     private ElapsedTime runtime = new ElapsedTime();
 
-    // Calculate the COUNTS_PER_INCH for your specific drive train.
-    // Go to your motor vendor website to determine your motor's COUNTS_PER_MOTOR_REV
-    // For external drive gearing, set DRIVE_GEAR_REDUCTION as needed.
+    // Calculate the COUNTS_PER_INCH_GOBUILDA for your specific drive train.
+    // Go to your motor vendor website to determine your motor's COUNTS_PER_MOTOR_REV_GOBUILDA
+    // For external drive gearing, set DRIVE_GEAR_REDUCTION_GOBUILDA as needed.
     // For example, use a value of 2.0 for a 12-tooth spur gear driving a 24-tooth spur gear.
     // This is gearing DOWN for less speed and more torque.
     // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
-    static final double COUNTS_PER_MOTOR_REV = 537.7;    // eg: TETRIX Motor Encoder
-    static final double DRIVE_GEAR_REDUCTION = 1.0;     // No External Gearing.
-    static final double WHEEL_DIAMETER_INCHES = 3.8;     // For figuring circumference
-    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-            (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double COUNTS_PER_MOTOR_REV_GOBUILDA = 384.5;    // eg:
+    static final double DRIVE_GEAR_REDUCTION_GOBUILDA = 1.0;     // No External Gearing.
+    static final double WHEEL_DIAMETER_INCHES_GOBUILDA = 3.78;     // https://www.gobilda.com/96mm-mecanum-wheel-set-70a-durometer-bearing-supported-rollers/
+    static final double COUNTS_PER_INCH_GOBUILDA = (COUNTS_PER_MOTOR_REV_GOBUILDA * DRIVE_GEAR_REDUCTION_GOBUILDA) /
+            (WHEEL_DIAMETER_INCHES_GOBUILDA * 3.1415);
+    static final double COUNTS_PER_MOTOR_REV_WITCHFINGERS = 28;
+    static final double DRIVE_GEAR_REDUCTION_WITCHFINGERS = 12;
+    static final double SPOOL_DIAMETER_INCHES_WITCHFINGERS = 1.18;
+    static final double COUNTS_PER_INCH_WITCHFINGERS = (COUNTS_PER_MOTOR_REV_WITCHFINGERS * DRIVE_GEAR_REDUCTION_WITCHFINGERS) /
+            (SPOOL_DIAMETER_INCHES_WITCHFINGERS * 3.1415);
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.5;
 
@@ -95,7 +100,7 @@ public class main_auto extends LinearOpMode {
         frontRight = hardwareMap.get(DcMotor.class, "frontRight");
         backLeft = hardwareMap.get(DcMotor.class, "backLeft");
         backRight = hardwareMap.get(DcMotor.class, "backRight");
-
+        witchfingersMotor = hardwareMap.get(DcMotor.class, "witchfingers");
         armMotor = hardwareMap.get(DcMotor.class, "arm"); //the arm motor
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -123,8 +128,10 @@ public class main_auto extends LinearOpMode {
 
         // Wait for the game to start (driver presses START)
         waitForStart();
-        driveMotors(0.5, 10, 1);
-        driveLeft(0.5, 10, 1);
+        driveMotors(0.5, 12, 5);
+        sleep(1000);
+        driveLeft(0.5, 12, 1);
+        encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, 5, 1);
         telemetry.addData("Path", "Complete");
         telemetry.update();
         sleep(1000);  // pause to display final telemetry message.
@@ -139,11 +146,11 @@ public class main_auto extends LinearOpMode {
      *  3) Driver stops the OpMode running.
      */
 
-    public void encoderMove(DcMotor motor, double speed, double inches, double timeoutS) {
+    public void encoderMove(DcMotor motor, double counts_per_inch, double speed, double inches, double timeoutS) {
         int target;
 
         if (opModeIsActive()) {
-            target = motor.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+            target = motor.getCurrentPosition() + (int) (inches * counts_per_inch);
             motor.setTargetPosition(target);
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             runtime.reset();
@@ -161,7 +168,7 @@ public class main_auto extends LinearOpMode {
         }
     }
 
-    public void driveLeft(double speed, double inches, double timeoutS) {
+    public void driveLeft(double speed, double inches, double timeouts) {
         int target;
 
 
@@ -171,26 +178,30 @@ public class main_auto extends LinearOpMode {
         int frontRL = 0;
 
 
-        frontLL = frontLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+        frontLL = frontLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
         frontLeft.setDirection(DcMotor.Direction.FORWARD);
+        frontLeft.setTargetPosition(frontLL);
         frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtime.reset();
         frontLeft.setPower(Math.abs(speed));
 
-        frontRL = frontRight.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH);
-        frontLeft.setDirection(DcMotor.Direction.REVERSE);
-        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRL = frontRight.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+        frontRight.setDirection(DcMotor.Direction.REVERSE);
+        frontRight.setTargetPosition(frontRL);
+        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtime.reset();
-        frontLeft.setPower(Math.abs(speed));
+        frontRight.setPower(Math.abs(speed));
 
-        backLL = backLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+        backLL = backLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
+        backLeft.setTargetPosition(backLL);
         backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtime.reset();
         backLeft.setPower(Math.abs(speed));
 
-        backRL = backRight.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH);
+        backRL = backRight.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
         backRight.setDirection(DcMotor.Direction.FORWARD);
+        backRight.setTargetPosition(backRL);
         backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtime.reset();
         backRight.setPower(Math.abs(speed));
@@ -206,25 +217,25 @@ public class main_auto extends LinearOpMode {
 
         if (opModeIsActive()) {
 
-            backR = backRight.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+            backR = backRight.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
                     backRight.setTargetPosition(backR);
                     backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     runtime.reset();
                     backRight.setPower(Math.abs(speed));
 
-            backL = backLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+            backL = backLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
                     backLeft.setTargetPosition(backL);
                     backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     runtime.reset();
                     backLeft.setPower(Math.abs(speed));
 
-            frontR = frontRight.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+            frontR = frontRight.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
             frontRight.setTargetPosition(frontR);
             frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             runtime.reset();
             frontRight.setPower(Math.abs(speed));
 
-            frontL = frontLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH);
+            frontL = frontLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
             frontLeft.setTargetPosition(frontL);
             frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             runtime.reset();
