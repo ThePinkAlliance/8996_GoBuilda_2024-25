@@ -35,6 +35,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 /*
  * This OpMode illustrates the concept of driving a path based on encoder counts.
  * The code is structured as a LinearOpMode
@@ -136,6 +138,7 @@ public class main_auto extends LinearOpMode {
         waitForStart();
         driveMotors(0.5, 12, 3);
         driveRight(0.5, 12, 3);
+        //driveRightUntilLimit(0.5,4,4);
         encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, 5, 1);
         telemetry.addData("Path", "Complete");
         telemetry.update();
@@ -217,6 +220,68 @@ public class main_auto extends LinearOpMode {
             }
         }
     }
+
+    public void driveLeft(double speed, double inches, double timeouts) {
+        int target;
+        boolean isMotorsBusyLeft = false;
+        int frontLL = 0;
+        int backLL = 0;
+        int backRL = 0;
+        int frontRL = 0;
+
+        if (opModeIsActive()) {
+
+            frontLL = frontLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+            frontLeft.setTargetPosition(frontLL);
+            frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            frontLeft.setPower(Math.abs(speed));
+
+            frontRL = frontRight.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+            frontRight.setTargetPosition(frontRL);
+            frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            frontRight.setPower(Math.abs(speed));
+
+            backLL = backLeft.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+            backLeft.setTargetPosition(backLL);
+            backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            backLeft.setPower(Math.abs(speed));
+
+            backRL = backRight.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+            backRight.setTargetPosition(backRL);
+            backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            runtime.reset();
+            backRight.setPower(Math.abs(speed));
+            isMotorsBusyLeft = frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() && backRight.isBusy();
+            while (opModeIsActive() && runtime.seconds() < timeouts && isMotorsBusyLeft) {
+                telemetry.addData("frontLeftDriveLeft is running to", "%7d", frontLL);
+                telemetry.addData("frontLeftDriveLeft is currently at", "%7d", frontLeft.getCurrentPosition());
+                telemetry.addData("frontRightDriveLeft Running to", "%7d", frontRL);
+                telemetry.addData("frontRightDriveLeft Currently at", "%7d", frontRight.getCurrentPosition());
+                telemetry.addData("backLeftDriveLeft is running to", "%7d", backLL);
+                telemetry.addData("BackLeftDriveLeft is currently at", "%7d", backLeft.getCurrentPosition());
+                telemetry.addData("backRightDriveLeft Running to", "%7d", backRL);
+                telemetry.addData("backRightDriveLeft Currently at", "%7d", backRight.getCurrentPosition());
+                telemetry.update();
+            }
+        }
+    }
+
+    public void driveRightUntilLimit(double speed, double inches, double timeouts) {
+
+        if (opModeIsActive()) {
+
+            runtime.reset();
+            while (opModeIsActive() && runtime.seconds() < timeouts && sensorDistance.getDistance(DistanceUnit.INCH) >= 4.0) {
+                frontLeft.setPower(Math.abs(speed));
+                frontRight.setPower(Math.abs(speed));
+                backLeft.setPower(Math.abs(speed));
+                backRight.setPower(Math.abs(speed));
+                telemetry.addData("distance sensor is reading", "%7d", sensorDistance.getDistance(DistanceUnit.INCH));
+                telemetry.update();
+            }
+        }
+    }
+
 
     public void driveMotors(double speed, double inches, double timeoutS) {
         int target;
