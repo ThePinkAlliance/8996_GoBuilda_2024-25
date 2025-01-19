@@ -33,13 +33,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
- * This file contains an example of a Linear "OpMode".
+ * This file contains an example of ae Linear "OpMode".
  * An OpMode is a 'program' that runs in either the autonomous or the teleop period of an FTC match.
  * The names of OpModes appear on the menu of the FTC Driver Station.
  * When a selection is made from the menu, the corresponding OpMode is executed.
@@ -75,7 +72,8 @@ public class Teleop extends LinearOpMode {
     private DcMotor leftBackDrive = null;
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
-    private DcMotor arm = null;
+    private DcMotor armL = null;
+    private DcMotor armR = null;
     private CRServo leftCarwash = null;
     private CRServo rightCarwash = null;
     private DcMotor witchfingers = null;
@@ -90,7 +88,8 @@ public class Teleop extends LinearOpMode {
 
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
-        arm = hardwareMap.get(DcMotor.class, "arm");
+        armL = hardwareMap.get(DcMotor.class, "armL");
+        armR = hardwareMap.get(DcMotor.class,"armR");
         leftCarwash = hardwareMap.get(CRServo.class, "left_servo");
         rightCarwash = hardwareMap.get(CRServo.class, "right_servo");
         leftFrontDrive  = hardwareMap.get(DcMotor.class, "frontLeft");
@@ -180,13 +179,9 @@ public class Teleop extends LinearOpMode {
                 rightBackDrive.setPower(rightBackPower /2);
 
             }
-            if (gamepad2.right_bumper == false) {
-                witchfingers.setPower(gamepad2.right_stick_y);
-                arm.setPower(gamepad2.left_stick_y);
-            } else {
-                witchfingers.setPower(gamepad2.right_stick_y /2);
-                arm.setPower(gamepad2.left_stick_y /2);
-            }
+            witchfingers.setPower(gamepad2.right_stick_y);
+            armL.setPower(gamepad2.left_stick_y);
+            armR.setPower(gamepad2.left_stick_y);
 
             if (gamepad2.x) { //grabs the sample
                leftCarwash.setPower(-1);
@@ -204,9 +199,9 @@ public class Teleop extends LinearOpMode {
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
             telemetry.addData("witchfingers: ", witchfingers.getTargetPosition());
-            telemetry.addData("arm: ", arm.getTargetPosition());
+            telemetry.addData("armL: ", armL.getTargetPosition());
             telemetry.addData("leftFront: ", leftFrontDrive.getTargetPosition());
-            telemetry.addData("arm: ", arm.getCurrentPosition());
+            telemetry.addData("armL: ", armL.getCurrentPosition());
             telemetry.update();
         }
     }}
