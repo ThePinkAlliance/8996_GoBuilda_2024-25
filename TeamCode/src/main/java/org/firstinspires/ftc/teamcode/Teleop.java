@@ -125,7 +125,7 @@ public class Teleop extends LinearOpMode {
             double max;
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            double axial   = gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value //NOTE: I Removed negative value that was originally here
+            double axial   = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value //NOTE: I Removed negative value that was originally here
             double lateral =  gamepad1.left_stick_x;
             double yaw     =  gamepad1.right_stick_x;
 
