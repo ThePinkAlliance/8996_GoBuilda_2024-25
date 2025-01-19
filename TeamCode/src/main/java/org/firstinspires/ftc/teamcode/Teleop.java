@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
@@ -84,8 +85,6 @@ public class Teleop extends LinearOpMode {
                     * 1 / 360.0; // we want ticks per degree, not per rotation
     @Override
     public void runOpMode() {
-
-
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
         armL = hardwareMap.get(DcMotor.class, "armL");
@@ -111,7 +110,8 @@ public class Teleop extends LinearOpMode {
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
-        witchfingers.setDirection(DcMotor.Direction.FORWARD);
+        witchfingers.setDirection(DcMotor.Direction.REVERSE);
+        armR.setDirection(DcMotorSimple.Direction.REVERSE);
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -124,9 +124,9 @@ public class Teleop extends LinearOpMode {
             double max;
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            double axial   = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value //NOTE: I Removed negative value that was originally here
-            double lateral =  gamepad1.left_stick_x;
-            double yaw     =  gamepad1.right_stick_x;
+            double axial   = gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value //NOTE: I Removed negative value that was originally here
+            double lateral =  -gamepad1.right_stick_x;
+            double yaw     =  gamepad1.left_stick_x;
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
@@ -180,8 +180,8 @@ public class Teleop extends LinearOpMode {
 
             }
             witchfingers.setPower(gamepad2.right_stick_y);
-            armL.setPower(gamepad2.left_stick_y);
-            armR.setPower(gamepad2.left_stick_y);
+            armL.setPower(gamepad2.left_stick_y * 0.75);
+            armR.setPower(gamepad2.left_stick_y * 0.75);
 
             if (gamepad2.x) { //grabs the sample
                leftCarwash.setPower(-1);
