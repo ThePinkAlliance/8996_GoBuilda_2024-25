@@ -136,10 +136,10 @@ public class main_auto extends LinearOpMode {
 
         // Wait for the game to start (driver presses START)
         waitForStart();
-        driveMotors(0.5, 12, 3);
-        driveRight(0.5, 12, 3);
-        //driveRightUntilLimit(0.5,4,4);
-        encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, 5, 1);
+       // driveMotors(0.5, 12, 3);
+        //driveRight(0.5, 12, 3);
+        //driveRightUntilLimit(0.5,10,4);
+        encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, 15, 5);
         telemetry.addData("Path", "Complete");
         telemetry.update();
         sleep(1000);  // pause to display final telemetry message.
