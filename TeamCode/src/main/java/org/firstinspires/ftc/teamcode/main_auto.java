@@ -136,10 +136,10 @@ public class main_auto extends LinearOpMode {
 
         // Wait for the game to start (driver presses START)
         waitForStart();
-       // driveMotors(0.5, 12, 3);
+        //driveMotors(0.5, 12, 3);
         //driveRight(0.5, 12, 3);
-        //driveRightUntilLimit(0.5,10,4);
-        encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, 15, 5);
+        driveRightUntilLimit(0.25,23);
+        //encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, 15, 5);
         telemetry.addData("Path", "Complete");
         telemetry.update();
         sleep(1000);  // pause to display final telemetry message.
@@ -266,18 +266,15 @@ public class main_auto extends LinearOpMode {
         }
     }
 
-    public void driveRightUntilLimit(double speed, double inches, double timeouts) {
+    public void driveRightUntilLimit(double speed, double inches) {
 
         if (opModeIsActive()) {
 
-            runtime.reset();
-            while (opModeIsActive() && runtime.seconds() < timeouts && sensorDistance.getDistance(DistanceUnit.INCH) >= 4.0) {
-                frontLeft.setPower(Math.abs(speed));
-                frontRight.setPower(Math.abs(speed));
-                backLeft.setPower(Math.abs(speed));
-                backRight.setPower(Math.abs(speed));
-                telemetry.addData("distance sensor is reading", "%7d", sensorDistance.getDistance(DistanceUnit.INCH));
-                telemetry.update();
+            while (opModeIsActive() && sensorDistance.getDistance(DistanceUnit.INCH) >= inches) {
+                frontLeft.setPower(-speed);
+                frontRight.setPower(speed);
+                backLeft.setPower(speed);
+                backRight.setPower(-speed);
             }
         }
     }
