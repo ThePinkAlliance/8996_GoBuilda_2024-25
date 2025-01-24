@@ -139,10 +139,11 @@ public class main_auto extends LinearOpMode {
         //driveMotors(0.5, 12, 3);
         //driveRight(0.5, 12, 3);
         driveRightUntilLimit(0.25,23);
-        //encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, 15, 5);
+        sleep(500);
+        encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, 15, 5);
         telemetry.addData("Path", "Complete");
         telemetry.update();
-        sleep(1000);  // pause to display final telemetry message.
+        sleep(500);  // pause to display final telemetry message.
     }
 
     /*
@@ -275,7 +276,16 @@ public class main_auto extends LinearOpMode {
                 frontRight.setPower(speed);
                 backLeft.setPower(speed);
                 backRight.setPower(-speed);
+
+                telemetry.addData("Distance (in)", sensorDistance.getDistance(DistanceUnit.INCH));
+                telemetry.update();
             }
+
+            // Stop all motors once the target distance is reached
+            frontLeft.setPower(0);
+            frontRight.setPower(0);
+            backLeft.setPower(0);
+            backRight.setPower(0);
         }
     }
 
