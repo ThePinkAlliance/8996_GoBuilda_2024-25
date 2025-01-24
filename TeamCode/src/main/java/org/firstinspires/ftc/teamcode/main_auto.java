@@ -138,9 +138,12 @@ public class main_auto extends LinearOpMode {
         waitForStart();
         //driveMotors(0.5, 12, 3);
         //driveRight(0.5, 12, 3);
-        driveRightUntilLimit(0.25,23);
-        sleep(500);
         encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, 15, 5);
+        sleep(500);
+        driveRightUntilLimit(0.25,7);
+        sleep(500);
+        encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, -15, 5);
+        sleep(500);
         telemetry.addData("Path", "Complete");
         telemetry.update();
         sleep(500);  // pause to display final telemetry message.
