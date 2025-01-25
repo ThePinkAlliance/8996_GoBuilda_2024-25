@@ -136,14 +136,15 @@ public class main_auto extends LinearOpMode {
 
         // Wait for the game to start (driver presses START)
         waitForStart();
-        //driveMotors(0.5, 12, 3);
-        //driveRight(0.5, 12, 3);
         encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, 15, 5);
         sleep(500);
-        driveRightUntilLimit(0.25,7);
+        driveUntilLimit(0.25,7, "right");
         sleep(500);
         encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, -15, 5);
         sleep(500);
+        driveUntilLimit(0.25,20, "left");
+        sleep(500);
+
         telemetry.addData("Path", "Complete");
         telemetry.update();
         sleep(500);  // pause to display final telemetry message.
@@ -180,105 +181,100 @@ public class main_auto extends LinearOpMode {
         }
     }
 
-    public void driveRight(double speed, double inches, double timeouts) {
-        int target;
-        boolean isMotorsBusyRight = false;
+    public void driveInDirection(double speed, double inches, double timeouts, String direction) {
         int frontLL = 0;
         int backLL = 0;
         int backRL = 0;
         int frontRL = 0;
+        boolean isMotorsBusy = false;
 
         if (opModeIsActive()) {
+            // Determine motor power and target positions based on direction
+            switch (direction) {
+                case "right":
+                    // Move right (strafe right)
+                    frontLL = frontLeft.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    frontRL = frontRight.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    backLL = backLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    backRL = backRight.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    break;
 
-            frontLL = frontLeft.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                case "left":
+                    // Move left (strafe left)
+                    frontLL = frontLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    frontRL = frontRight.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    backLL = backLeft.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    backRL = backRight.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    break;
+
+                case "up":
+                    // Move up (forward)
+                    frontLL = frontLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    frontRL = frontRight.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    backLL = backLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    backRL = backRight.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    break;
+
+                case "down":
+                    // Move down (backward)
+                    frontLL = frontLeft.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    frontRL = frontRight.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    backLL = backLeft.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    backRL = backRight.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
+                    break;
+            }
             frontLeft.setTargetPosition(frontLL);
             frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             frontLeft.setPower(Math.abs(speed));
-
-            frontRL = frontRight.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
             frontRight.setTargetPosition(frontRL);
             frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             frontRight.setPower(Math.abs(speed));
-
-            backLL = backLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
             backLeft.setTargetPosition(backLL);
             backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             backLeft.setPower(Math.abs(speed));
-
-            backRL = backRight.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
             backRight.setTargetPosition(backRL);
             backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            runtime.reset();
             backRight.setPower(Math.abs(speed));
-            isMotorsBusyRight = frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() && backRight.isBusy();
-            while (opModeIsActive() && runtime.seconds() < timeouts && isMotorsBusyRight) {
-                telemetry.addData("frontLeftDriveLeft is running to", "%7d", frontLL);
-                telemetry.addData("frontLeftDriveLeft is currently at", "%7d", frontLeft.getCurrentPosition());
-                telemetry.addData("frontRightDriveLeft Running to", "%7d", frontRL);
-                telemetry.addData("frontRightDriveLeft Currently at", "%7d", frontRight.getCurrentPosition());
-                telemetry.addData("backLeftDriveLeft is running to", "%7d", backLL);
-                telemetry.addData("BackLeftDriveLeft is currently at", "%7d", backLeft.getCurrentPosition());
-                telemetry.addData("backRightDriveLeft Running to", "%7d", backRL);
-                telemetry.addData("backRightDriveLeft Currently at", "%7d", backRight.getCurrentPosition());
+            runtime.reset();
+            isMotorsBusy = frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() && backRight.isBusy();
+
+            while (opModeIsActive() && runtime.seconds() < timeouts && isMotorsBusy) {
+                telemetry.addData("frontLeft is running to", "%7d", frontLL);
+                telemetry.addData("frontLeft is currently at", "%7d", frontLeft.getCurrentPosition());
+                telemetry.addData("frontRight is running to", "%7d", frontRL);
+                telemetry.addData("frontRight is currently at", "%7d", frontRight.getCurrentPosition());
+                telemetry.addData("backLeft is running to", "%7d", backLL);
+                telemetry.addData("backLeft is currently at", "%7d", backLeft.getCurrentPosition());
+                telemetry.addData("backRight is running to", "%7d", backRL);
+                telemetry.addData("backRight is currently at", "%7d", backRight.getCurrentPosition());
                 telemetry.update();
+
+                isMotorsBusy = frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() && backRight.isBusy();
             }
         }
     }
 
-    public void driveLeft(double speed, double inches, double timeouts) {
-        int target;
-        boolean isMotorsBusyLeft = false;
-        int frontLL = 0;
-        int backLL = 0;
-        int backRL = 0;
-        int frontRL = 0;
 
-        if (opModeIsActive()) {
 
-            frontLL = frontLeft.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
-            frontLeft.setTargetPosition(frontLL);
-            frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            frontLeft.setPower(Math.abs(speed));
-
-            frontRL = frontRight.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
-            frontRight.setTargetPosition(frontRL);
-            frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            frontRight.setPower(Math.abs(speed));
-
-            backLL = backLeft.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH_GOBUILDA);
-            backLeft.setTargetPosition(backLL);
-            backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            backLeft.setPower(Math.abs(speed));
-
-            backRL = backRight.getCurrentPosition() + (int) (inches * COUNTS_PER_INCH_GOBUILDA);
-            backRight.setTargetPosition(backRL);
-            backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            runtime.reset();
-            backRight.setPower(Math.abs(speed));
-            isMotorsBusyLeft = frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() && backRight.isBusy();
-            while (opModeIsActive() && runtime.seconds() < timeouts && isMotorsBusyLeft) {
-                telemetry.addData("frontLeftDriveLeft is running to", "%7d", frontLL);
-                telemetry.addData("frontLeftDriveLeft is currently at", "%7d", frontLeft.getCurrentPosition());
-                telemetry.addData("frontRightDriveLeft Running to", "%7d", frontRL);
-                telemetry.addData("frontRightDriveLeft Currently at", "%7d", frontRight.getCurrentPosition());
-                telemetry.addData("backLeftDriveLeft is running to", "%7d", backLL);
-                telemetry.addData("BackLeftDriveLeft is currently at", "%7d", backLeft.getCurrentPosition());
-                telemetry.addData("backRightDriveLeft Running to", "%7d", backRL);
-                telemetry.addData("backRightDriveLeft Currently at", "%7d", backRight.getCurrentPosition());
-                telemetry.update();
-            }
-        }
-    }
-
-    public void driveRightUntilLimit(double speed, double inches) {
+    public void driveUntilLimit(double speed, double inches, String direction) {
 
         if (opModeIsActive()) {
 
             while (opModeIsActive() && sensorDistance.getDistance(DistanceUnit.INCH) >= inches) {
-                frontLeft.setPower(-speed);
-                frontRight.setPower(speed);
-                backLeft.setPower(speed);
-                backRight.setPower(-speed);
+
+                if (direction.equals("right")) {
+                    // Move right
+                    frontLeft.setPower(-speed);
+                    frontRight.setPower(speed);
+                    backLeft.setPower(speed);
+                    backRight.setPower(-speed);
+                } else if (direction.equals("left")) {
+                    // Move left
+                    frontLeft.setPower(speed);
+                    frontRight.setPower(-speed);
+                    backLeft.setPower(-speed);
+                    backRight.setPower(speed);
+                }
 
                 telemetry.addData("Distance (in)", sensorDistance.getDistance(DistanceUnit.INCH));
                 telemetry.update();
@@ -291,6 +287,7 @@ public class main_auto extends LinearOpMode {
             backRight.setPower(0);
         }
     }
+
 
 
     public void driveMotors(double speed, double inches, double timeoutS) {
