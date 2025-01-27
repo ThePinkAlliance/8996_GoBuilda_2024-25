@@ -136,6 +136,7 @@ public class main_auto extends LinearOpMode {
 
         // Wait for the game to start (driver presses START)
         waitForStart();
+        //Below commented code works
         encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, 15, 5);
         sleep(500);
         driveUntilLimit(0.25,7, "right");
@@ -143,6 +144,16 @@ public class main_auto extends LinearOpMode {
         encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, -15, 5);
         sleep(500);
         driveUntilLimit(0.25,20, "left");
+        sleep(500);
+
+
+        driveInDirection(0.25, 15, 5,"up");
+        sleep(500);
+        driveInDirection(0.25, 10, 5, "left");
+        sleep(500);
+        driveInDirection(0.25, 9, 5, "up");
+        sleep(500);
+        driveInDirection(0.25, 15, 5, "right");
         sleep(500);
 
         telemetry.addData("Path", "Complete");
@@ -260,24 +271,27 @@ public class main_auto extends LinearOpMode {
 
         if (opModeIsActive()) {
 
-            while (opModeIsActive() && sensorDistance.getDistance(DistanceUnit.INCH) >= inches) {
-
-                if (direction.equals("right")) {
+            if (direction.equals("right")){
+                while (opModeIsActive() && sensorDistance.getDistance(DistanceUnit.INCH) >= inches) {
                     // Move right
                     frontLeft.setPower(-speed);
                     frontRight.setPower(speed);
                     backLeft.setPower(speed);
                     backRight.setPower(-speed);
-                } else if (direction.equals("left")) {
+                    telemetry.addData("Distance (in)", sensorDistance.getDistance(DistanceUnit.INCH));
+                    telemetry.update();
+                }
+            }
+            else if (direction.equals("left")){
+                while (opModeIsActive() && sensorDistance.getDistance(DistanceUnit.INCH) <= inches) {
                     // Move left
                     frontLeft.setPower(speed);
                     frontRight.setPower(-speed);
                     backLeft.setPower(-speed);
                     backRight.setPower(speed);
+                    telemetry.addData("Distance (in)", sensorDistance.getDistance(DistanceUnit.INCH));
+                    telemetry.update();
                 }
-
-                telemetry.addData("Distance (in)", sensorDistance.getDistance(DistanceUnit.INCH));
-                telemetry.update();
             }
 
             // Stop all motors once the target distance is reached
