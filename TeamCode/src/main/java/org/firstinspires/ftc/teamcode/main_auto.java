@@ -139,21 +139,13 @@ public class main_auto extends LinearOpMode {
         //Below commented code works
         encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, 15, 5);
         sleep(500);
-        driveUntilLimit(0.25,7, "right");
+        driveUntilLimit(0.25,6, "right");
         sleep(500);
         encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, -15, 5);
         sleep(500);
-        driveUntilLimit(0.25,20, "left");
+        driveUntilLimit(0.25,30, "left");
         sleep(500);
-
-
-        driveInDirection(0.25, 15, 5,"up");
-        sleep(500);
-        driveInDirection(0.25, 10, 5, "left");
-        sleep(500);
-        driveInDirection(0.25, 9, 5, "up");
-        sleep(500);
-        driveInDirection(0.25, 15, 5, "right");
+        driveInDirection(0.25, 50, 5,"up");
         sleep(500);
 
         telemetry.addData("Path", "Complete");
