@@ -134,23 +134,37 @@ public class main_auto_v2 extends LinearOpMode {
         // ---------------------------
         // Example sequence using encoder-based moves:
         // ---------------------------
+        //At start, robot is 0 degrees
         encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, 15, 5);
         sleep(500);
         driveUntilLimit(0.25, 6, "right");
         sleep(500);
         encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, -15, 5);
         sleep(500);
-        driveUntilLimit(0.25, 30, "left");
+        driveUntilLimit(0.25, 12, "left");
         sleep(500);
-        driveInDirection(0.25, 50, 5, "up");
+        turnToHeading(5.55,-90);
         sleep(500);
+        driveInDirectionGyro(0.25,34,-90, "right");
+        sleep(500);
+        driveInDirectionGyro(0.25, 24.99, -90, "up");
+        sleep(500);
+        driveUntilLimit(0.25, 20, "right");
+        sleep(500);
+        driveInDirectionGyro(0.25, 36, -90, "down");
+        sleep(500);
+        driveInDirectionGyro(0.25, 16, -90, "up");
+        sleep(500);
+        turnToHeading(5.55, -180);
+        sleep(3000);
+        driveInDirectionGyro(0.25, 20, -180, "left");
 
         // ---------------------------
         // Example sequence using gyro-based moves:
         // (Uncomment the following lines if you wish to use the gyro methods.)
         // ---------------------------
         // driveStraightGyro(0.6, 24.0, 0.0);       // Drive forward 24 inches at 0° heading.
-        // turnToHeading(0.5, -45.0);               // Turn to -45°.
+        //turnToHeading(0.5, -90.0);               // Turn to -45°.
         // holdHeading(0.5, -45.0, 0.5);            // Hold -45° for 0.5 seconds.
         // driveStraightGyro(0.6, 17.0, -45.0);      // Drive 17 inches while maintaining -45°.
         // turnToHeading(0.5, 45.0);                // Turn to 45°.
@@ -285,14 +299,14 @@ public class main_auto_v2 extends LinearOpMode {
                 targetBL = backLeft.getCurrentPosition() - counts;
                 targetBR = backRight.getCurrentPosition() + counts;
                 break;
-            case "up":
+            case "down":
                 // For forward (up), all motors add the same count.
                 targetFL = frontLeft.getCurrentPosition() + counts;
                 targetFR = frontRight.getCurrentPosition() + counts;
                 targetBL = backLeft.getCurrentPosition() + counts;
                 targetBR = backRight.getCurrentPosition() + counts;
                 break;
-            case "down":
+            case "up":
                 targetFL = frontLeft.getCurrentPosition() - counts;
                 targetFR = frontRight.getCurrentPosition() - counts;
                 targetBL = backLeft.getCurrentPosition() - counts;
@@ -300,10 +314,10 @@ public class main_auto_v2 extends LinearOpMode {
                 break;
             default:
                 // If an unknown direction is passed, default to forward.
-                targetFL = frontLeft.getCurrentPosition() + counts;
-                targetFR = frontRight.getCurrentPosition() + counts;
-                targetBL = backLeft.getCurrentPosition() + counts;
-                targetBR = backRight.getCurrentPosition() + counts;
+                targetFL = frontLeft.getCurrentPosition() - counts;
+                targetFR = frontRight.getCurrentPosition() - counts;
+                targetBL = backLeft.getCurrentPosition() - counts;
+                targetBR = backRight.getCurrentPosition() - counts;
                 break;
         }
 
