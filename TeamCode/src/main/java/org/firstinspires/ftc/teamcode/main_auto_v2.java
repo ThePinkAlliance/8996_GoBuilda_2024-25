@@ -31,6 +31,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -49,6 +50,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  */
 
 @Autonomous(name="autonomous MAIN V2", group="Auto")
+
 public class main_auto_v2 extends LinearOpMode {
 
     /* Declare OpMode members. */
@@ -135,29 +137,38 @@ public class main_auto_v2 extends LinearOpMode {
         // Example sequence using encoder-based moves:
         // ---------------------------
         //At start, robot is 0 degrees
-        encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, 15, 5);
-        sleep(500);
+        //Raise witchfingers to high chamber
+        encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.75, 15, 2.5);
+        sleep(250);
+        //Move toward submersible
         driveUntilLimit(0.25, 6, "right");
         sleep(500);
+        //Lower witchfingers' specimen onto high chamber
         encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, -15, 5);
         sleep(500);
-        driveUntilLimit(0.25, 12, "left");
+        //move back away from the chambers until about halfway between the wall and the submersible
+        driveUntilLimit(0.5, 12, "left");
+        sleep(800);
+        //rotate 90 degrees clockwise to where robot is facing south
+        turnToHeading(1.0,-90);
         sleep(500);
-        turnToHeading(5.55,-90);
+        //Continue to drive robot south until roughly halfway between nearest spike mark and submersible
+        driveInDirectionGyro(0.5,40,-90, "right");
         sleep(500);
-        driveInDirectionGyro(0.25,34,-90, "right");
+        //drive the robot east until it has passed the three specimens on the spike marks
+        driveInDirectionGyro(0.5, 33, -90, "up");
         sleep(500);
-        driveInDirectionGyro(0.25, 24.99, -90, "up");
+        //Drive the robot south until the west edge of the robot is aligned with the nearest spikemark
+        driveUntilLimit(0.25, 23, "right");
         sleep(500);
-        driveUntilLimit(0.25, 20, "right");
+        //Push the sample all the way to the observation zone
+        driveInDirectionGyro(0.75, 30, -90, "down");
         sleep(500);
-        driveInDirectionGyro(0.25, 36, -90, "down");
-        sleep(500);
-        driveInDirectionGyro(0.25, 16, -90, "up");
-        sleep(500);
-        turnToHeading(5.55, -180);
-        sleep(3000);
-        driveInDirectionGyro(0.25, 20, -180, "left");
+//        driveInDirectionGyro(0.25, 16, -90, "up");
+//        sleep(500);
+//        turnToHeading(5.55, -180);
+//        sleep(3000);
+//        driveInDirectionGyro(0.25, 20, -180, "left");
 
         // ---------------------------
         // Example sequence using gyro-based moves:
@@ -428,6 +439,70 @@ public class main_auto_v2 extends LinearOpMode {
             backLeft.setPower(0);
             backRight.setPower(0);
         }
+    }
+
+    /**
+     * Drives in a specified direction while maintaining a gyro-corrected heading,
+     * stopping when the distance sensor reaches a specified limit.
+     *
+     * @param maxDriveSpeed Maximum translational speed (0..1)
+     * @param targetDistance Distance (in inches) at which to stop
+     * @param heading Desired heading (in degrees) to hold during the move
+     * @param direction Movement direction: "up" (forward), "down" (backward), "right" (strafe right), or "left" (strafe left)
+     */
+    public void driveUntilLimitGyro(double maxDriveSpeed, double targetDistance, double heading, String direction) {
+        double vx = 0, vy = 0;
+
+        // Define movement vector based on direction
+        switch(direction.toLowerCase()) {
+            case "right":   vx = maxDriveSpeed;  break;
+            case "left":    vx = -maxDriveSpeed; break;
+            case "up":      vy = maxDriveSpeed;  break;
+            case "down":    vy = -maxDriveSpeed; break;
+            default:        vy = maxDriveSpeed;  break;
+        }
+
+        // Start driving until distance sensor detects limit
+        while (opModeIsActive() && sensorDistance.getDistance(DistanceUnit.INCH) > targetDistance) {
+            // Compute gyro correction
+            double rotationCorrection = getSteeringCorrection(heading, 0.03);
+
+            // Mecanum drive mixing
+            double powerFL = vy + vx + rotationCorrection;
+            double powerFR = vy - vx - rotationCorrection;
+            double powerBL = vy - vx + rotationCorrection;
+            double powerBR = vy + vx - rotationCorrection;
+
+            // Normalize power values if any exceed 1.0
+            double maxPower = Math.max(Math.abs(powerFL), Math.max(Math.abs(powerFR),
+                    Math.max(Math.abs(powerBL), Math.abs(powerBR))));
+            if (maxPower > 1.0) {
+                powerFL /= maxPower;
+                powerFR /= maxPower;
+                powerBL /= maxPower;
+                powerBR /= maxPower;
+            }
+
+            // Apply motor power
+            frontLeft.setPower(powerFL);
+            frontRight.setPower(powerFR);
+            backLeft.setPower(powerBL);
+            backRight.setPower(powerBR);
+
+            // Telemetry feedback
+            telemetry.addData("Target Distance", targetDistance);
+            telemetry.addData("Current Distance", sensorDistance.getDistance(DistanceUnit.INCH));
+            telemetry.addData("Heading", heading);
+            telemetry.addData("Rotation Correction", rotationCorrection);
+            telemetry.addData("Motor Powers", "FL: %.2f, FR: %.2f, BL: %.2f, BR: %.2f", powerFL, powerFR, powerBL, powerBR);
+            telemetry.update();
+        }
+
+        // Stop all motion once target distance is reached
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backLeft.setPower(0);
+        backRight.setPower(0);
     }
 
     public void driveMotors(double speed, double inches, double timeoutS) {

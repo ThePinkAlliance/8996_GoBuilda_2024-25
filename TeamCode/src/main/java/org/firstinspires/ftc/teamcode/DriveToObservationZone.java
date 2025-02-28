@@ -63,9 +63,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="autonomous MAIN", group="Auto")
+@Autonomous(name="Drive To Observation Zone", group="Auto")
 
-public class main_auto extends LinearOpMode {
+public class DriveToObservationZone extends LinearOpMode {
 
     /* Declare OpMode members. */
     private DcMotor frontRight = null;
@@ -137,14 +137,6 @@ public class main_auto extends LinearOpMode {
         // Wait for the game to start (driver presses START)
         waitForStart();
         //Below commented code works
-        encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 0.5, 15, 5);
-        sleep(500);
-        driveUntilLimit(0.25,6, "right");
-        sleep(500);
-        encoderMove(witchfingersMotor, COUNTS_PER_INCH_WITCHFINGERS, 1, -15, 5);
-        sleep(500);
-        driveUntilLimit(0.25,30, "left");
-        sleep(500);
         driveInDirection(0.25, 50, 5,"up");
         sleep(500);
 
